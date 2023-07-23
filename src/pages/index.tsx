@@ -1,12 +1,16 @@
 // import NestedLayout from '../components/nested-layout'
-import { useRouter } from "next/router";
+import { useAtomValue } from "jotai";
 import type { ReactElement } from "react";
 import Layout from "~/components/Layout";
 import Spotify from "~/components/Spotify";
+import Chat from "~/components/chat";
+import { tokenAtom } from "~/store/app";
 
 export default function Page() {
+  const token = useAtomValue(tokenAtom);
+
   return (
-    <div className="relative isolate overflow-hidden ">
+    <div className="relative isolate  overflow-hidden ">
       <div className="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-zinc  text-3xl font-bold tracking-tight sm:text-4xl">
@@ -19,7 +23,7 @@ export default function Page() {
             anim id veniam aliqua proident excepteur commodo do ea.
           </p> */}
           <div className="mt-10 flex items-center justify-center gap-x-6">
-            <Spotify />
+            {token.access_token ? <Chat /> : <Spotify />}
           </div>
         </div>
       </div>

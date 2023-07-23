@@ -7,6 +7,7 @@ import {
 } from "openai-edge";
 import { OpenAIStream, StreamingTextResponse } from "ai";
 import { env } from "~/env.mjs";
+import { kv } from "@vercel/kv";
 
 // Optional, but recommended: run on the edge runtime.
 // See https://vercel.com/docs/concepts/functions/edge-functions
@@ -53,7 +54,17 @@ export default async function handler(req: Request) {
   });
 
   // Convert the response into a friendly text-stream
-  const stream = OpenAIStream(response);
+  const key = JSON.stringify(messages); // come up with a key based on the request
+
+  const stream = OpenAIStream(response, {
+    async onCompletion(completion) {
+      // Cache the response
+      const l = await kv.set(key, completion);
+
+      console.log(l);
+      await kv.expire(key, 60 * 60);
+    },
+  });
 
   // Respond with the stream
   return new StreamingTextResponse(stream);

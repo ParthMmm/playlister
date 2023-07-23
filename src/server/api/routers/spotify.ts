@@ -4,6 +4,33 @@ import { z } from "zod";
 import { env } from "~/env.mjs";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
+type User = {
+  display_name: string;
+  external_urls: {
+    spotify: string;
+  };
+  href: string;
+  id: string;
+  images: {
+    url: string;
+    height: number;
+    width: number;
+  }[];
+  type: string;
+  uri: string;
+  followers: {
+    href: null | string;
+    total: number;
+  };
+  country: string;
+  product: string;
+  explicit_content: {
+    filter_enabled: boolean;
+    filter_locked: boolean;
+  };
+  email: string;
+};
+
 export const spotifyRouter = createTRPCRouter({
   getToken: publicProcedure
     .input(z.object({ code: z.string() }))
@@ -16,8 +43,6 @@ export const spotifyRouter = createTRPCRouter({
           message: "No code provided",
         });
       }
-
-      console.log({ code });
 
       const authOptions = {
         url: "https://accounts.spotify.com/api/token",
@@ -46,15 +71,45 @@ export const spotifyRouter = createTRPCRouter({
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const body = await data.json();
 
-      console.log(body);
-
       return body as {
         access_token: string;
         token_type: string;
         expires_in: number;
         refresh_token: string;
+        scope: string;
       };
 
       //   res.status(200).json(body);
+    }),
+
+  getUser: publicProcedure
+    .input(z.object({ token: z.string() }))
+    .query(async ({ input }) => {
+      const { token } = input;
+
+      if (!token) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No token provided",
+        });
+      }
+
+      const authOptions = {
+        url: "https://api.spotify.com/v1/me",
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+        json: true,
+      };
+
+      const data = await fetch(authOptions.url, {
+        method: "GET",
+        headers: authOptions.headers,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const user: User = await data.json();
+
+      return user;
     }),
 });

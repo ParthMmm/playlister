@@ -9,6 +9,13 @@ interface Token {
   token_type: string;
   expires_in: number;
   refresh_token: string;
+  scope: string;
 }
 
-export const tokenAtom = atom({} as Token);
+export const tokenAtom = atom({
+  access_token: "",
+  token_type: "",
+  expires_in: 0,
+  refresh_token: "",
+  scope: "",
+} as Token);
