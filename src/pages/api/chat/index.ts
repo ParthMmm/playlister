@@ -34,11 +34,17 @@ x.push({
   `,
 });
 
+type Body = {
+  messages: ChatCompletionRequestMessage[];
+  userId: string;
+};
+
 export default async function handler(req: Request) {
   // Extract the `messages` from the body of the request
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { messages }: { messages: ChatCompletionRequestMessage[] } =
-    await req.json();
+  const { messages, userId }: Body = await req.json();
+  console.log(userId);
+  // console.log(req.json());
 
   if (!messages?.[0]) {
     throw new Error("No messages");
@@ -54,7 +60,7 @@ export default async function handler(req: Request) {
   });
 
   // Convert the response into a friendly text-stream
-  const key = JSON.stringify(messages); // come up with a key based on the request
+  const key = userId; // come up with a key based on the request
 
   const stream = OpenAIStream(response, {
     async onCompletion(completion) {

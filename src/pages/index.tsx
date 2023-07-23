@@ -2,12 +2,27 @@
 import { useAtomValue } from "jotai";
 import type { ReactElement } from "react";
 import Layout from "~/components/Layout";
+import Songs from "~/components/Songs";
 import Spotify from "~/components/Spotify";
 import Chat from "~/components/chat";
 import { tokenAtom } from "~/store/app";
+import { api } from "~/utils/api";
 
 export default function Page() {
   const token = useAtomValue(tokenAtom);
+
+  const user = api.spotify.getUser.useQuery(
+    { token: token?.access_token },
+    {
+      enabled: !!token.access_token,
+      refetchInterval: false,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchIntervalInBackground: false,
+    }
+  );
+
+  // if (!user.data) return;
 
   return (
     <div className="relative isolate  overflow-hidden ">
@@ -23,7 +38,15 @@ export default function Page() {
             anim id veniam aliqua proident excepteur commodo do ea.
           </p> */}
           <div className="mt-10 flex items-center justify-center gap-x-6">
-            {token.access_token ? <Chat /> : <Spotify />}
+            {user?.data ? (
+              <>
+                {" "}
+                <Chat userId={user?.data?.id} />
+                <Songs userId={user?.data?.id} />
+              </>
+            ) : (
+              <Spotify />
+            )}
           </div>
         </div>
       </div>

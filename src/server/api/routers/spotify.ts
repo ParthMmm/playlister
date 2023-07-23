@@ -3,6 +3,7 @@ import { stringify } from "querystring";
 import { z } from "zod";
 import { env } from "~/env.mjs";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { kv } from "@vercel/kv";
 
 type User = {
   display_name: string;
@@ -111,5 +112,45 @@ export const spotifyRouter = createTRPCRouter({
       const user: User = await data.json();
 
       return user;
+    }),
+
+  getSongs: publicProcedure
+    .input(z.object({ userId: z.string(), token: z.string() }))
+    .query(async ({ input }) => {
+      const { userId, token } = input;
+
+      if (!token) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No token provided",
+        });
+      }
+
+      const songs = await kv.get(userId);
+
+      if (!songs) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No songs provided",
+        });
+      }
+
+      // const authOptions = {
+      //   url: `https://api.spotify.com/v1/search`,
+      //   headers: {
+      //     Authorization: "Bearer " + token,
+      //   },
+      //   json: true,
+      // };
+
+      // const data = await fetch(
+      //   `${authOptions.url}?q=${userId}&type=track&limit=10`,
+      //   {
+      //     method: "GET",
+      //     headers: authOptions.headers,
+      //   }
+      // );
+
+      return songs;
     }),
 });
