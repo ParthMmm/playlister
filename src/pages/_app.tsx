@@ -5,6 +5,8 @@ import Layout from "~/components/Layout";
 import { ThemeProvider } from "~/components/theme-provider";
 import { Analytics } from "@vercel/analytics/react";
 
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
@@ -12,6 +14,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
         <Component {...pageProps} />
         <Analytics />
       </Layout>
+      <ReactQueryDevtools initialIsOpen={false} />
     </ThemeProvider>
   );
 };

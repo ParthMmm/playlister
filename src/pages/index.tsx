@@ -1,6 +1,6 @@
 // import NestedLayout from '../components/nested-layout'
 import { useAtomValue } from "jotai";
-import type { ReactElement } from "react";
+import { type ReactElement, useState } from "react";
 import Layout from "~/components/Layout";
 import Songs from "~/components/Songs";
 import Spotify from "~/components/Spotify";
@@ -9,6 +9,7 @@ import { tokenAtom } from "~/store/app";
 import { api } from "~/utils/api";
 
 export default function Page() {
+  const [formatted, setFormatted] = useState(false);
   const token = useAtomValue(tokenAtom);
 
   const user = api.spotify.getUser.useQuery(
@@ -41,8 +42,8 @@ export default function Page() {
             {user?.data ? (
               <>
                 {" "}
-                <Chat userId={user?.data?.id} />
-                <Songs userId={user?.data?.id} />
+                <Chat userId={user?.data?.id} setFormatted={setFormatted} />
+                <Songs userId={user?.data?.id} formatted={formatted} />
               </>
             ) : (
               <Spotify />

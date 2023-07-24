@@ -4,6 +4,11 @@ import { z } from "zod";
 import { env } from "~/env.mjs";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { kv } from "@vercel/kv";
+import {
+  type Tracks,
+  type APIResponse,
+  type Item,
+} from "~/server/api/routers/types";
 
 type User = {
   display_name: string;
@@ -30,6 +35,13 @@ type User = {
     filter_locked: boolean;
   };
   email: string;
+};
+
+type Songs = Song[];
+
+type Song = {
+  artist: string;
+  song: string;
 };
 
 export const spotifyRouter = createTRPCRouter({
@@ -126,7 +138,7 @@ export const spotifyRouter = createTRPCRouter({
         });
       }
 
-      const songs = await kv.get(userId);
+      const songs: Songs | null = await kv.get(userId);
 
       if (!songs) {
         throw new TRPCError({
@@ -135,22 +147,70 @@ export const spotifyRouter = createTRPCRouter({
         });
       }
 
-      // const authOptions = {
-      //   url: `https://api.spotify.com/v1/search`,
-      //   headers: {
-      //     Authorization: "Bearer " + token,
-      //   },
-      //   json: true,
-      // };
+      const results = await searchSongs(songs, token);
 
-      // const data = await fetch(
-      //   `${authOptions.url}?q=${userId}&type=track&limit=10`,
-      //   {
-      //     method: "GET",
-      //     headers: authOptions.headers,
-      //   }
-      // );
+      return results;
 
-      return songs;
+      // return songs;
     }),
 });
+
+type Return = {
+  artist: string;
+  song: string;
+  track: Item | null;
+};
+
+async function searchSongs(
+  songs: Songs,
+  token: string
+): Promise<(Return | undefined)[]> {
+  const promises = songs.map((song: Song) => getTracks(song, token));
+  const results = await Promise.all(promises);
+  return results;
+}
+
+const getTracks = async (song: Song, token: string) => {
+  const authOptions = {
+    url: `https://api.spotify.com/v1/search`,
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+    json: true,
+  };
+
+  try {
+    const res = await fetch(
+      `${authOptions.url}?q=track:${encodeURIComponent(
+        song.song
+      )}%20artist:${encodeURIComponent(song.artist)}&type=track`,
+      {
+        method: "GET",
+        headers: authOptions.headers,
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error("Error");
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const data: Tracks | null = await res.json();
+
+    if (data?.tracks?.items.length === 0) {
+      return {
+        artist: song.artist,
+        song: song.song,
+        track: null,
+      };
+    }
+
+    return {
+      artist: song.artist,
+      song: song.song,
+      track: data?.tracks?.items[0] ?? null,
+    };
+  } catch (e) {
+    console.error(e);
+  }
+};

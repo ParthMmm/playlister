@@ -4,15 +4,16 @@ import { api } from "~/utils/api";
 
 type Props = {
   userId: string;
+  formatted: boolean;
 };
 
-const Songs = ({ userId }: Props) => {
+const Songs = ({ userId, formatted }: Props) => {
   const token = useAtomValue(tokenAtom);
 
   const songs = api.spotify.getSongs.useQuery(
     { token: token?.access_token, userId },
     {
-      enabled: !!token.access_token && !!userId,
+      enabled: !!token.access_token && !!userId && !!formatted,
     }
   );
 

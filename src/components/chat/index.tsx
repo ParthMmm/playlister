@@ -1,16 +1,37 @@
-import { useChat } from "ai/react";
+import { useCompletion } from "ai/react";
+import { useAtomValue } from "jotai";
+import { type Dispatch, type SetStateAction } from "react";
 import { Textarea } from "~/components/ui/textarea";
+import { tokenAtom } from "~/store/app";
+import { api } from "~/utils/api";
 
 type Props = {
   userId: string;
+  setFormatted: Dispatch<SetStateAction<boolean>>;
 };
 
-export default function Chat({ userId }: Props) {
-  const { messages, handleSubmit, input, handleInputChange } = useChat({
+export default function Chat({ userId, setFormatted }: Props) {
+  const token = useAtomValue(tokenAtom);
+
+  const {
+    completion,
+    input,
+    stop,
+    isLoading,
+    handleInputChange,
+    handleSubmit,
+  } = useCompletion({
+    api: "/api/chat",
     body: {
       userId,
     },
+    onFinish: (prompt, completion) => {
+      console.log({ completion });
+      setFormatted(true);
+    },
   });
+
+  if (isLoading) return <div>Loading...</div>;
 
   return (
     <form onSubmit={handleSubmit}>
@@ -24,9 +45,7 @@ export default function Chat({ userId }: Props) {
       />
 
       <button type="submit">Submit</button>
-      {messages.map((message, i) => (
-        <div key={i}>{message.content}</div>
-      ))}
+      <div>{completion}</div>
     </form>
   );
 }
