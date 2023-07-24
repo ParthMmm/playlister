@@ -31,7 +31,7 @@ export default function Chat({ userId, setFormatted }: Props) {
     },
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <div>Formatting Songs...</div>;
 
   return (
     <form onSubmit={handleSubmit}>
@@ -45,7 +45,7 @@ export default function Chat({ userId, setFormatted }: Props) {
       />
 
       <button type="submit">Submit</button>
-      <div>{completion}</div>
+      {/* <div>{completion}</div> */}
     </form>
   );
 }

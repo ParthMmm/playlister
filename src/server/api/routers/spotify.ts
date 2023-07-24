@@ -149,13 +149,34 @@ export const spotifyRouter = createTRPCRouter({
 
       const results = await searchSongs(songs, token);
 
-      return results;
+      if (!results) return null;
+
+      //filter any null results
+      const filteredResults = results.filter((result) => result !== null);
+
+      //sort successfull results where tracks are not null
+      const goodResults = filteredResults.filter(
+        (result) => result?.track !== null
+      ) as ReturnSong[];
+
+      //get all tracks that are null
+      const badResults = filteredResults.filter(
+        (result) => result?.track === null
+      ) as ReturnSong[];
+
+      return {
+        goodResults,
+        badResults,
+      };
 
       // return songs;
     }),
 });
 
-type Return = {
+export type ReturnSong = {
+  // album: any;
+  // name: string;
+  // artists: any;
   artist: string;
   song: string;
   track: Item | null;
@@ -164,7 +185,7 @@ type Return = {
 async function searchSongs(
   songs: Songs,
   token: string
-): Promise<(Return | undefined)[]> {
+): Promise<(ReturnSong | null)[]> {
   const promises = songs.map((song: Song) => getTracks(song, token));
   const results = await Promise.all(promises);
   return results;
@@ -213,4 +234,5 @@ const getTracks = async (song: Song, token: string) => {
   } catch (e) {
     console.error(e);
   }
+  return null;
 };
