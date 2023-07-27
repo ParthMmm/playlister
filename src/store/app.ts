@@ -1,10 +1,12 @@
 //add jotai atom
 
-import { atom } from "jotai";
+import { type PrimitiveAtom, atom } from "jotai";
+import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
+const storage = createJSONStorage(() => sessionStorage);
 export const codeAtom = atom("" as string);
 
-type Token = {
+export type Token = {
   access_token: string;
   token_type: string;
   expires_in: number;
@@ -12,13 +14,17 @@ type Token = {
   scope: string;
 };
 
-export const tokenAtom = atom({
-  access_token: "",
-  token_type: "",
-  expires_in: 0,
-  refresh_token: "",
-  scope: "",
-} as Token);
+export const tokenAtom = atomWithStorage(
+  "x",
+  {
+    access_token: "",
+    token_type: "",
+    expires_in: 0,
+    refresh_token: "",
+    scope: "",
+  } as Token,
+  storage
+) as PrimitiveAtom<Token>;
 
 type Length = {
   good: number;
@@ -29,3 +35,6 @@ export const lengthAtom = atom({
   good: 0,
   bad: 0,
 } as Length);
+
+export const playingTrackIdAtom = atom<string | null>(null);
+export const playingAtom = atom<boolean | null | string>(false);

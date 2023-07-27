@@ -3,7 +3,7 @@ import Track from "~/components/track";
 import { type ReturnSong } from "~/server/api/routers/spotify";
 import { lengthAtom, tokenAtom } from "~/store/app";
 import { api } from "~/utils/api";
-import { motion } from "framer-motion";
+import { motion, stagger } from "framer-motion";
 import Counter from "~/components/counter";
 import { useEffect } from "react";
 
@@ -45,8 +45,9 @@ const Songs = ({ userId, formatted }: Props) => {
               // animate={{ opacity: 1, y: "0%" }}
               transition={{
                 duration: 1.3,
-                delay: 0.1 * i,
+                // delayChildren: 0.2,
                 ease: [0.075, 0.82, 0.165, 1],
+                staggerChildren: 0.2,
               }}
               viewport={{ once: true }}
               whileInView={{ opacity: 1, y: "0%" }}
