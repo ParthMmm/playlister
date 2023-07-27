@@ -49,10 +49,43 @@ type Body = {
   userId: string;
 };
 
+type Cache = {
+  artist: string;
+  song: string;
+};
+
 export default async function handler(req: Request) {
   // Extract the `messages` from the body of the request
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { prompt, userId }: Body = await req.json();
+  const cached = await kv.get(userId);
+
+  if (cached) {
+    // return new Response(cached);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+    const c = cached as Cache[];
+    console.log("cache hit");
+    return new Response(JSON.stringify(c));
+
+    // const chunks = c.split(" ");
+    // const stream = new ReadableStream({
+    //   async start(controller) {
+    //     for (const chunk of chunks) {
+    //       const bytes = new TextEncoder().encode(chunk + " ");
+    //       controller.enqueue(bytes);
+    //       await new Promise((r) =>
+    //         setTimeout(
+    //           r,
+    //           // get a random number between 10ms and 50ms to simulate a random delay
+    //           Math.floor(Math.random() * 40) + 10
+    //         )
+    //       );
+    //     }
+    //     controller.close();
+    //   },
+    // });
+    // return new StreamingTextResponse(stream);
+  }
 
   // console.log(req.json());
 

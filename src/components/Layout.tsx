@@ -5,9 +5,9 @@ import { ModeToggle } from "~/components/theme-toggle";
 
 import { Inter } from "next/font/google";
 
-interface Props {
+type Props = {
   children: ReactNode;
-}
+};
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,9 +22,9 @@ function Layout({ children }: Props) {
         {/* <meta property="og:image" content="https://auriom.club/api/og" /> */}
       </Head>
       <main className={inter.className}>
-        <Nav />
-        <div className="mx-auto min-h-screen max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl">{children}</div>
+        <div className=" no-scrollbar mx-auto max-h-screen min-h-screen max-w-7xl px-4 sm:px-6 lg:px-8 ">
+          <Nav />
+          <div className="mx-auto max-w-5xl">{children}</div>
         </div>
       </main>
     </>
@@ -33,8 +33,8 @@ function Layout({ children }: Props) {
 
 const Nav = () => {
   return (
-    <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-      <div className="h-1g relative flex items-center justify-between">
+    <div className="fixed mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+      <div className="relative flex  items-center justify-between">
         <ModeToggle />
       </div>
     </div>

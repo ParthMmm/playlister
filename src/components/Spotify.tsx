@@ -22,6 +22,7 @@ const Spotify = () => {
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       refetchIntervalInBackground: false,
+      // keepPreviousData: true,
     }
   );
 

@@ -4,13 +4,13 @@ import { atom } from "jotai";
 
 export const codeAtom = atom("" as string);
 
-interface Token {
+type Token = {
   access_token: string;
   token_type: string;
   expires_in: number;
   refresh_token: string;
   scope: string;
-}
+};
 
 export const tokenAtom = atom({
   access_token: "",
@@ -19,3 +19,13 @@ export const tokenAtom = atom({
   refresh_token: "",
   scope: "",
 } as Token);
+
+type Length = {
+  good: number;
+  bad: number;
+};
+
+export const lengthAtom = atom({
+  good: 0,
+  bad: 0,
+} as Length);
