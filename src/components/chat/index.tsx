@@ -9,6 +9,8 @@ type Props = {
   userId: string;
 };
 
+export const runtime = "edge";
+
 export default function Chat({ userId }: Props) {
   const setFormatted = useSetAtom(formattedAtom);
   const setPrompt = useSetAtom(promptAtom);

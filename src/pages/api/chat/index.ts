@@ -82,7 +82,7 @@ export default async function handler(req: Request) {
         Yuzamei - amalgam but its jungle, 00:00 nuphory feat. Pizza Hotline - Startup Tune, goreshit - fine night (telemist's remix). 
        
        If there is a timestamp, the timestamp should be removed. The text needs to be formatted so it can be searched in Spotify and return the correct result. If the artist field has multiple values and is seperated by x, feat., or anything else format the artists seperated by commas. 
-       Please format the songs into a JSON object. 
+       Please format the songs into a JSON object. Do not return any extra text.
        Example: nuphory feat. Pizza Hotline - Startup Tune
       should return [{artist: nuphory, Pizza Hotline,  song: Startup Tune}]
       
