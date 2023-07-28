@@ -1,15 +1,13 @@
-import { useAtom } from "jotai";
+import { useSetAtom } from "jotai";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { tokenAtom } from "~/store/app";
 import { api } from "~/utils/api";
 
 const Spotify = () => {
   const router = useRouter();
-  const [token, setToken] = useAtom(tokenAtom);
-  const [clicked, setClicked] = useState(false);
+  const setToken = useSetAtom(tokenAtom);
   const code = router.query.code as string;
 
   const { data } = api.spotify.getToken.useQuery(
@@ -32,7 +30,7 @@ const Spotify = () => {
   }
 
   return (
-    <Link href="/api/login" onClick={() => setClicked(true)}>
+    <Link href="/api/login">
       <Button className="bg-green-500 hover:bg-green-600" type="submit">
         Connect to Spotify
       </Button>

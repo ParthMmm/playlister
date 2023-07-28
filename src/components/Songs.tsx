@@ -1,34 +1,39 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import Track from "~/components/track";
-import { type ReturnSong } from "~/server/api/routers/spotify";
-import { lengthAtom, tokenAtom } from "~/store/app";
+import { formattedAtom, lengthAtom, promptAtom, tokenAtom } from "~/store/app";
 import { api } from "~/utils/api";
-import { motion, stagger } from "framer-motion";
-import Counter from "~/components/counter";
+import { motion } from "framer-motion";
+
 import { useEffect } from "react";
+import FailTrack from "~/components/fail-track";
 
 type Props = {
   userId: string;
-  formatted: boolean;
 };
 
-const Songs = ({ userId, formatted }: Props) => {
+const Songs = ({ userId }: Props) => {
   const token = useAtomValue(tokenAtom);
   const setLength = useSetAtom(lengthAtom);
+  const formatted = useAtomValue(formattedAtom);
+  const prompt = useAtomValue(promptAtom);
 
   const songs = api.spotify.getSongs.useQuery(
-    { token: token?.access_token, userId },
+    { token: token?.access_token, userId, prompt },
     {
-      enabled: !!token.access_token && !!userId && !!formatted,
+      enabled: !!token.access_token && !!userId && !!formatted && !!prompt,
       keepPreviousData: true,
+      refetchInterval: false,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchIntervalInBackground: false,
     }
   );
 
   useEffect(() => {
     if (songs.data) {
       setLength({
-        good: songs.data.goodResults.length,
-        bad: songs.data.badResults.length,
+        good: songs?.data.goodResults.length,
+        bad: songs?.data.badResults.length,
       });
     }
   }, [setLength, songs.data]);
@@ -36,16 +41,29 @@ const Songs = ({ userId, formatted }: Props) => {
   if (!songs.data) return null;
 
   if (songs.data) {
+    //put all track uris in an array
+
     return (
-      <div className="no-scrollbar flex h-[calc(100vh-4rem)] flex-col overflow-auto scroll-smooth p-4">
+      <motion.div
+        initial={{ opacity: 0, y: "0%" }}
+        animate={{ opacity: 1, y: "0%" }}
+        transition={{
+          duration: 2,
+          type: "tween",
+          ease: [0.075, 0.82, 0.165, 1],
+        }}
+        exit={{ opacity: 0, y: "0%" }}
+        className="no-scrollbar flex h-[calc(100vh-4rem)] w-full  flex-col overflow-auto scroll-smooth p-4 md:w-1/2"
+      >
         <div className="space-y-4">
-          {songs.data.goodResults.map((song, i) => (
+          {songs.data.goodResults.map((song) => (
             <motion.div
               initial={{ opacity: 0, y: "140%" }}
               // animate={{ opacity: 1, y: "0%" }}
               transition={{
                 duration: 1.3,
                 // delayChildren: 0.2,
+                type: "tween",
                 ease: [0.075, 0.82, 0.165, 1],
                 staggerChildren: 0.2,
               }}
@@ -60,17 +78,42 @@ const Songs = ({ userId, formatted }: Props) => {
           ))}
         </div>
 
-        <div className="flex flex-col items-center justify-center">
+        <motion.span
+          initial={{ opacity: 0, y: "140%" }}
+          transition={{
+            duration: 1.3,
+            ease: [0.075, 0.82, 0.165, 1],
+          }}
+          viewport={{ once: true }}
+          whileInView={{ opacity: 1, y: "0%" }}
+          className="my-4  text-left font-semibold md:ml-4"
+        >
+          Songs Not Found
+        </motion.span>
+        <div className="mb-16 space-y-4">
           {songs.data.badResults.map((song) => (
-            <div key={`${song?.song} + ${song.artist}`}>
-              <p className="text-2xl font-semibold text-white">{song?.song}</p>
-              <p className="text-lg font-semibold text-white">{song?.artist}</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: "140%" }}
+              transition={{
+                duration: 1.3,
+                ease: [0.075, 0.82, 0.165, 1],
+                staggerChildren: 0.2,
+              }}
+              viewport={{ once: true }}
+              whileInView={{ opacity: 1, y: "0%" }}
+              key={`${song?.song} + ${song.artist}`}
+              className="flex flex-col items-center justify-center"
+              layout
+            >
+              <FailTrack track={song} />
+            </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
     );
   }
+
+  console.log("a");
 
   return null;
 };

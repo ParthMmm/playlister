@@ -6,8 +6,8 @@ import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { kv } from "@vercel/kv";
 import {
   type Tracks,
-  type APIResponse,
   type Item,
+  type Playlist,
 } from "~/server/api/routers/types";
 
 type User = {
@@ -42,6 +42,11 @@ type Songs = Song[];
 type Song = {
   artist: string;
   song: string;
+};
+
+type Cache = {
+  goodResults: ReturnSong[];
+  badResults: ReturnSong[];
 };
 
 export const spotifyRouter = createTRPCRouter({
@@ -127,56 +132,177 @@ export const spotifyRouter = createTRPCRouter({
     }),
 
   getSongs: publicProcedure
-    .input(z.object({ userId: z.string(), token: z.string() }))
+    .input(
+      z.object({ userId: z.string(), token: z.string(), prompt: z.string() })
+    )
     .query(async ({ input }) => {
-      const { userId, token } = input;
+      const { userId, token, prompt } = input;
 
-      if (!token) {
+      try {
+        if (!token) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "No token provided",
+          });
+        }
+
+        const key = `${userId}-${prompt}`;
+
+        const songs: Songs | null = await kv.get(key);
+
+        if (!songs) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "No songs provided",
+          });
+        }
+
+        const spotKey = `${userId}-${prompt}-spotify`;
+        const cached = await kv.get(spotKey);
+
+        if (cached) {
+          const c = cached as Cache;
+          return {
+            goodResults: c.goodResults,
+            badResults: c.badResults,
+          };
+        }
+
+        const results = await searchSongs(songs, token);
+
+        if (!results) return null;
+
+        //filter any null results
+        const filteredResults = results.filter((result) => result !== null);
+
+        //sort successfull results where tracks are not null
+        const goodResults = filteredResults.filter(
+          (result) => result?.track !== null
+        ) as ReturnSong[];
+
+        //get all tracks that are null
+        const badResults = filteredResults.filter(
+          (result) => result?.track === null
+        ) as ReturnSong[];
+
+        await kv.set(spotKey, {
+          goodResults,
+          badResults,
+        });
+        await kv.expire(spotKey, 60 * 60);
+
+        return {
+          goodResults,
+          badResults,
+        };
+      } catch (error: unknown) {
+        const e = error as Error;
+
+        console.error({
+          message: e.message,
+          input,
+          function: "getSongs",
+        });
+
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "No token provided",
+          message: e.message,
         });
       }
-
-      const songs: Songs | null = await kv.get(userId);
-
-      if (!songs) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "No songs provided",
-        });
-      }
-
-      const results = await searchSongs(songs, token);
-
-      if (!results) return null;
-
-      //filter any null results
-      const filteredResults = results.filter((result) => result !== null);
-
-      //sort successfull results where tracks are not null
-      const goodResults = filteredResults.filter(
-        (result) => result?.track !== null
-      ) as ReturnSong[];
-
-      //get all tracks that are null
-      const badResults = filteredResults.filter(
-        (result) => result?.track === null
-      ) as ReturnSong[];
-
-      return {
-        goodResults,
-        badResults,
-      };
 
       // return songs;
+    }),
+
+  createPlaylist: publicProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        token: z.string(),
+        removedTracks: z.array(z.string()),
+        prompt: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { userId, token, removedTracks, prompt } = input;
+
+      try {
+        const spotKey = `${userId}-${prompt}-spotify`;
+        const cached = await kv.get(spotKey);
+
+        const authOptions = {
+          url: `https://api.spotify.com/v1/users/${userId}/playlists`,
+          headers: {
+            Authorization: "Bearer " + token,
+          },
+          json: true,
+        };
+
+        const data = await fetch(authOptions.url, {
+          method: "POST",
+          headers: authOptions.headers,
+          body: JSON.stringify({
+            name: "Playlistify",
+            description: "Playlist created by Playlistify",
+            public: true,
+          }),
+        });
+
+        const playlist = (await data.json()) as Playlist;
+
+        const playlistId = playlist.id;
+        const playlistUrl = playlist.external_urls.spotify;
+
+        if (cached) {
+          const c = cached as Cache;
+          const goodResults = c.goodResults as {
+            artist: string;
+            song: string;
+            track: Item;
+          }[];
+
+          //filter out removed tracks
+          const filteredResults = goodResults.filter(
+            (result) => !removedTracks.includes(result?.track?.id)
+          );
+
+          const authOptions = {
+            url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+            json: true,
+          };
+
+          const data = await fetch(authOptions.url, {
+            method: "POST",
+            headers: authOptions.headers,
+            body: JSON.stringify({
+              uris: filteredResults.map((result) => result.track.uri),
+            }),
+          });
+
+          if (data.ok) {
+            return playlistUrl;
+          }
+        }
+      } catch (error: unknown) {
+        const e = error as Error;
+
+        console.error({
+          message: e.message,
+          input,
+          function: "createPlaylist",
+        });
+
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: e.message,
+        });
+      }
     }),
 });
 
 export type ReturnSong = {
-  // album: any;
-  // name: string;
-  // artists: any;
   artist: string;
   song: string;
   track: Item | null;
@@ -186,9 +312,23 @@ async function searchSongs(
   songs: Songs,
   token: string
 ): Promise<(ReturnSong | null)[]> {
-  const promises = songs.map((song: Song) => getTracks(song, token));
-  const results = await Promise.all(promises);
-  return results;
+  try {
+    const promises = songs.map((song: Song) => getTracks(song, token));
+    const results = await Promise.all(promises);
+    return results;
+  } catch (error: unknown) {
+    const e = error as Error;
+
+    console.error({
+      message: e.message,
+      function: "searchSongs",
+    });
+
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: e.message,
+    });
+  }
 }
 
 const getTracks = async (song: Song, token: string) => {
@@ -212,7 +352,13 @@ const getTracks = async (song: Song, token: string) => {
     );
 
     if (!res.ok) {
-      throw new Error("Error");
+      console.log(`${song.artist} - ${song.song} not found`);
+      // throw new Error(`${song.artist} - ${song.song} not found`);
+      return {
+        artist: song.artist,
+        song: song.song,
+        track: null,
+      };
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -231,8 +377,12 @@ const getTracks = async (song: Song, token: string) => {
       song: song.song,
       track: data?.tracks?.items[0] ?? null,
     };
-  } catch (e) {
-    console.error(e);
+  } catch (e: unknown) {
+    const error = e as Error;
+    console.error({
+      message: error.message,
+      function: "getTracks",
+    });
   }
   return null;
 };

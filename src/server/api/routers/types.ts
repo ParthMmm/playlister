@@ -91,3 +91,35 @@ export type ExternalIds = {
 export type ExternalUrls4 = {
   spotify: string;
 };
+
+type Followers = {
+  href: null;
+  total: number;
+};
+
+type Owner = {
+  display_name: string;
+  external_urls: ExternalUrls;
+  href: string;
+  id: string;
+  type: string;
+  uri: string;
+};
+
+export type Playlist = {
+  collaborative: boolean;
+  description: string;
+  external_urls: ExternalUrls;
+  followers: Followers;
+  href: string;
+  id: string;
+  images: Image[]; // Update 'Image' type with correct properties.
+  name: string;
+  owner: Owner;
+  primary_color: null;
+  public: boolean;
+  snapshot_id: string;
+  tracks: Tracks;
+  type: string;
+  uri: string;
+};

@@ -10,7 +10,7 @@ type Direction =
   | "bottom left"
   | "bottom right";
 
-interface LinearGradientProps {
+type LinearGradientProps = {
   /**
    * The color to transition from
    * @default #00000000
@@ -59,7 +59,7 @@ interface LinearGradientProps {
    * @type string
    * */
   className?: string;
-}
+};
 
 const LinearGradient = ({
   from = "#00000000",

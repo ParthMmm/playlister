@@ -38,3 +38,8 @@ export const lengthAtom = atom({
 
 export const playingTrackIdAtom = atom<string | null>(null);
 export const playingAtom = atom<boolean | null | string>(false);
+
+export const removedTracksAtom = atom<string[]>([]);
+export const addedTracksAtom = atom<(string | undefined)[]>([]);
+export const formattedAtom = atom<boolean>(false);
+export const promptAtom = atom<string>("");

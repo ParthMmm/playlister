@@ -4,19 +4,23 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { cn } from "~/lib/utils";
 
 const fontSize = 30;
 const padding = 15;
 const height = fontSize + padding;
 
-function Counter({ value }: { value: number }) {
+function Counter({ value, className }: { value: number; className?: string }) {
   return (
     <div
       style={{ fontSize }}
-      className="flex space-x-3 overflow-hidden rounded bg-transparent px-2 leading-none text-white"
+      className={cn(
+        "firs flex overflow-hidden rounded bg-transparent px-2  text-zinc-900 first:pl-0 dark:text-white",
+        className
+      )}
     >
-      <Digit place={100} value={value} />
+      {/* <Digit place={100} value={value} /> */}
       <Digit place={10} value={value} />
       <Digit place={1} value={value} />
     </div>

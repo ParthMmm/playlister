@@ -1,28 +1,19 @@
 import { useCompletion } from "ai/react";
-import { useAtomValue } from "jotai";
+import { useSetAtom } from "jotai";
 import { Loader2 } from "lucide-react";
-import { type Dispatch, type SetStateAction } from "react";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
-import { tokenAtom } from "~/store/app";
-import { api } from "~/utils/api";
+import { formattedAtom, promptAtom } from "~/store/app";
 
 type Props = {
   userId: string;
-  setFormatted: Dispatch<SetStateAction<boolean>>;
 };
 
-export default function Chat({ userId, setFormatted }: Props) {
-  const token = useAtomValue(tokenAtom);
+export default function Chat({ userId }: Props) {
+  const setFormatted = useSetAtom(formattedAtom);
+  const setPrompt = useSetAtom(promptAtom);
 
-  const {
-    completion,
-    input,
-    stop,
-    isLoading,
-    handleInputChange,
-    handleSubmit,
-  } = useCompletion({
+  const { input, isLoading, handleInputChange, handleSubmit } = useCompletion({
     api: "/api/chat",
     body: {
       userId,
@@ -30,12 +21,16 @@ export default function Chat({ userId, setFormatted }: Props) {
     onFinish: (prompt, completion) => {
       console.log({ completion });
       setFormatted(true);
+      setPrompt(prompt);
     },
   });
 
   return (
     <form onSubmit={handleSubmit}>
-      <label htmlFor="input" className="mb-1 block text-sm font-medium ">
+      <label
+        htmlFor="input"
+        className="sr-only mb-1 block text-sm font-medium "
+      >
         Songs
       </label>
 
@@ -46,7 +41,7 @@ export default function Chat({ userId, setFormatted }: Props) {
         id="input"
       />
       <div className="flex justify-end">
-        <Button type="submit" className="mt-2" disabled={isLoading}>
+        <Button type="submit" className="mt-4" disabled={isLoading || !userId}>
           {isLoading ? (
             <Loader2 className="flex h-4 w-8 grow animate-spin" />
           ) : (
