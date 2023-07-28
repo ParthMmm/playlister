@@ -220,10 +220,11 @@ export const spotifyRouter = createTRPCRouter({
         token: z.string(),
         removedTracks: z.array(z.string()),
         prompt: z.string(),
+        name: z.string(),
       })
     )
     .mutation(async ({ input }) => {
-      const { userId, token, removedTracks, prompt } = input;
+      const { userId, token, removedTracks, prompt, name } = input;
 
       try {
         const spotKey = `${userId}-${prompt}-spotify`;
@@ -241,7 +242,7 @@ export const spotifyRouter = createTRPCRouter({
           method: "POST",
           headers: authOptions.headers,
           body: JSON.stringify({
-            name: "Playlistify",
+            name: name,
             description: "Playlist created by Playlistify",
             public: true,
           }),
@@ -282,7 +283,10 @@ export const spotifyRouter = createTRPCRouter({
           });
 
           if (data.ok) {
-            return playlistUrl;
+            return {
+              playlistUrl,
+              name,
+            };
           }
         }
       } catch (error: unknown) {

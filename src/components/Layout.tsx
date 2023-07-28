@@ -24,10 +24,8 @@ function Layout({ children }: Props) {
       <main className={inter.className}>
         <div className=" no-scrollbar mx-auto max-h-screen min-h-screen max-w-7xl px-4 sm:px-6 lg:px-8 ">
           <Nav />
-          <div className="relative max-h-screen overflow-hidden ">
-            <div className="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
-              <div className="mx-auto  text-center">{children}</div>
-            </div>
+          <div className="relative max-h-screen overflow-hidden px-6 py-24 sm:px-6 sm:py-32 lg:px-8 ">
+            <div className="mx-auto  text-center">{children}</div>
           </div>
         </div>
       </main>

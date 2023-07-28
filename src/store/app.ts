@@ -43,3 +43,13 @@ export const removedTracksAtom = atom<string[]>([]);
 export const addedTracksAtom = atom<(string | undefined)[]>([]);
 export const formattedAtom = atom<boolean>(false);
 export const promptAtom = atom<string>("");
+
+type Playlist = {
+  name: string;
+  url: string;
+};
+
+export const playlistAtom = atom<Playlist>({
+  name: "",
+  url: "",
+} as Playlist);
