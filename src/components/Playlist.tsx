@@ -21,9 +21,13 @@ const Playlist = () => {
         <h2 className="text-3xl font-semibold tracking-tight">
           Playlist Created
         </h2>
-        <Link href={playlist.url} className="hover:text-green-500">
-          <span>{playlist.name}</span>
-        </Link>
+        <a
+          href={playlist.url}
+          className="hover:text-green-500"
+          rel="noopener noreferrer"
+        >
+          {playlist.name}
+        </a>
       </div>
     </motion.div>
   );

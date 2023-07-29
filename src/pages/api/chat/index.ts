@@ -20,27 +20,35 @@ const apiConfig = new Configuration({
 const openai = new OpenAIApi(apiConfig);
 
 const instructions = `You format text. The text will be a tracklist. The formatted output should be Artist - Song Name. The text will be in different formats. Here are examples: 
-Yuzamei - amalgam but its jungle, 00:00 nuphory feat. Pizza Hotline - Startup Tune, goreshit - fine night (telemist's remix). 
 
 If there is a timestamp, the timestamp should be removed. 
 Ignore text that includes ID, ID - ID, - ID.
 The text needs to be formatted so it can be searched in Spotify and return the correct result. If the artist field has multiple values and is seperated by x, feat., or anything else format the artists seperated by commas. 
-Please format the songs into a JSON object. 
-Example: nuphory feat. Pizza Hotline - Startup Tune
-should return [{artist: nuphory, Pizza Hotline,  song: Startup Tune}]
 
-If the text includes vs. the text should be split like this:
+Use the following example input and output to learn how to split songs and artists.
 
-Input:
+Example Input:
+Yuzamei - amalgam but its jungle
+goreshit - fine night (telemist's remix)
+00:00 nuphory feat. Pizza Hotline - Startup Tune
 Knock2 vs. Toby Green - JADE vs. In Too Deep
 [9:21] Knock2 vs. Sean Kingston - JADE VIP vs. Fire Burning (Knock2 Edit)
+Layton Giordani vs. Odd Mob - UFOs & LFOs vs. Left To Right
+YehMe2 - Horny Part 2 w/ Buraka Som Sistema - Hangover (BaBaBa) w/ YOGI ft. Pusha T - Burial w/ Masayoshi Iimori - Bomb Breaker
+Skeler & Deadcrow - ADRENALIN
+Boombox Cartel vs. Lil Nas X & Jack Harlow vs. DJ Ride - Rock Dem vs. Industry Baby vs. TAKETHISWAY (RL Grime Edit) 
 
-Ouput:
-Knock2 - JADE
-Toby Green - In Too Deep
-Knock2 - JADE VIP
-Sean Kingston - Fire Burning (Knock2 Edit)`;
+Example Ouput:
+[{\"artist\": \"Yuzamei\", \"song\": \"amalgam but its jungle\"},{\"artist\": \"goreshit\", \"song\": \"fine night (telemist's remix)\"},{\"artist\": \"nuphory, Pizza Hotline\",  \"song\": \"Startup Tune\"},{\"artist\": \"Knock2\", \"song\": \"JADE\"}, {\"artist\": \"Toby Green\", \"song\": \"In Too Deep\"},{\"artist\": \"Knock2\", \"song\": \"JADE VIP\"},{\"artist\": \"Sean Kingston\", \"song\": \"Fire Burning (Knock2 Edit)\"},{\"artist\": \"Layton Giordani\", \"song\": \"UFOs & LFOs\"},{\"artist\": \"Odd Mob\", \"song\": \"Left To Right\"},{\"artist\": \"YehMe2\", \"song\": \"Horny Part 2\"},{\"artist\": \"Buraka Som Sistema\", \"song\": \"Hangover (BaBaBa)\"},{\"artist\": \"YOGI, Pusha T\", \"song\": \"Burial\"},{\"artist\": \"Masayoshi Iimori\", \"song\": \"Bomb Breaker\"},{\"artist\": \"Skeler, Deadcrow\", \"song\": \"ADRENALIN\"},{\"artist\": \"Boombox Cartel\", \"song\": \"Rock Dem\"},{\"artist\": \"Lil Nas X, Jack Harlow\", \"song\": \"Industry Baby\"},{\"artist\": \"DJ Ride\", \"song\": \"TAKETHISWAY (RL Grime Edit)\"}]
 
+]
+
+Please format the songs into a JSON object. Do not include any extra text. Only a json like this [{artist: artist, song: song}].
+[no prose] 
+
+`;
+
+// ('[\n  {\n    "artist": "RL Grime",\n    "song": "ID1 w/ Erica Banks - Pop Out"\n  },\n  {\n    "artist": "PEEKABOO, ISOxo",\n    "song": "POWERMOVE w/ Major Lazer - Original Don (feat. The Partysquad) w/ W IN K & Nikko - UHD"\n  },\n  {\n    "artist": "Knock2",\n    "song": "JADE"\n  },\n  {\n    "artist": "Toby Green",\n    "song": "In Too Deep"\n  }\n]');
 type Body = {
   prompt: string;
   userId: string;
@@ -78,13 +86,7 @@ export default async function handler(req: Request) {
     messages: [
       {
         role: "user",
-        content: `You format text. The text will be a tracklist. The formatted output should be Artist - Song Name. The text will be in different formats. Here are examples: 
-        Yuzamei - amalgam but its jungle, 00:00 nuphory feat. Pizza Hotline - Startup Tune, goreshit - fine night (telemist's remix). 
-       
-       If there is a timestamp, the timestamp should be removed. The text needs to be formatted so it can be searched in Spotify and return the correct result. If the artist field has multiple values and is seperated by x, feat., or anything else format the artists seperated by commas. 
-       Please format the songs into a JSON object. Do not return any extra text.
-       Example: nuphory feat. Pizza Hotline - Startup Tune
-      should return [{artist: nuphory, Pizza Hotline,  song: Startup Tune}]
+        content: `${instructions}
       
       These are the songs to format:
       ${prompt}

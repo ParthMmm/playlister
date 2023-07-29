@@ -200,7 +200,7 @@ export const spotifyRouter = createTRPCRouter({
 
         console.error({
           message: e.message,
-          input,
+          // input,
           function: "getSongs",
         });
 

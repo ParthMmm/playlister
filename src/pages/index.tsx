@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { useAtomValue } from "jotai";
 import { type ReactElement } from "react";
 import Counts from "~/components/Counts";
@@ -19,19 +20,29 @@ export default function Page() {
     { token: token?.access_token },
     {
       enabled: !!token.access_token,
-      refetchInterval: false,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      refetchIntervalInBackground: false,
+      // refetchInterval: false,
+      // refetchOnMount: false,
+      // refetchOnWindowFocus: false,
+      // refetchIntervalInBackground: false,
       keepPreviousData: true,
     }
   );
 
-  if (user.isLoading) return null;
+  if (user.isLoading && token.access_token) return null;
 
   if (!user?.data?.id) {
     return (
-      <>
+      <motion.div
+        initial={{ opacity: 0, y: "20%" }}
+        animate={{ opacity: 1, y: "0%" }}
+        transition={{
+          duration: 1.5,
+          type: "tween",
+          delay: 1,
+          ease: [0.075, 0.82, 0.165, 1],
+        }}
+        exit={{ opacity: 0, y: "0%" }}
+      >
         <h2 className="  text-3xl font-bold tracking-tight sm:text-4xl">
           Playlister
           <br />
@@ -40,7 +51,7 @@ export default function Page() {
         <div className="mt-24 flex items-center justify-center ">
           <Spotify />
         </div>
-      </>
+      </motion.div>
     );
   }
 
