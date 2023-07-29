@@ -15,8 +15,8 @@ const Counts = ({}) => {
       initial={{ opacity: 0, y: "0%" }}
       animate={{ opacity: 1, y: "0%" }}
       transition={{
-        duration: 1.3,
-        delay: 1,
+        duration: 1.0,
+        // delay: 1,
         ease: [0.075, 0.82, 0.165, 1],
       }}
     >

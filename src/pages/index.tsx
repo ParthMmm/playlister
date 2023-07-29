@@ -46,7 +46,7 @@ export default function Page() {
         <h2 className="  text-3xl font-bold tracking-tight sm:text-4xl">
           Playlister
           <br />
-          Create your playlist today.
+          Turn a tracklist into a playlist
         </h2>
         <div className="mt-24 flex items-center justify-center ">
           <Spotify />
