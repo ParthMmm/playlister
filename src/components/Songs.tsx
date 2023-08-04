@@ -79,18 +79,20 @@ const Songs = ({ userId }: Props) => {
           ))}
         </div>
 
-        <motion.span
-          initial={{ opacity: 0, y: "140%" }}
-          transition={{
-            duration: 1.3,
-            ease: [0.075, 0.82, 0.165, 1],
-          }}
-          viewport={{ once: true }}
-          whileInView={{ opacity: 1, y: "0%" }}
-          className="my-4  text-left font-semibold md:ml-4"
-        >
-          Songs Not Found
-        </motion.span>
+        {songs.data.badResults.length > 0 ? (
+          <motion.span
+            initial={{ opacity: 0, y: "140%" }}
+            transition={{
+              duration: 1.3,
+              ease: [0.075, 0.82, 0.165, 1],
+            }}
+            viewport={{ once: true }}
+            whileInView={{ opacity: 1, y: "0%" }}
+            className="my-4  text-left font-semibold md:ml-4"
+          >
+            Songs Not Found
+          </motion.span>
+        ) : null}
         <div className="mb-16 space-y-4">
           {songs.data.badResults.map((song) => (
             <motion.div

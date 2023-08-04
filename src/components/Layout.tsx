@@ -24,7 +24,7 @@ function Layout({ children }: Props) {
       </Head>
       <main className={inter.className}>
         <div className=" no-scrollbar mx-auto max-h-screen min-h-screen max-w-7xl px-4 sm:px-6 lg:px-8 ">
-          <Nav />
+          {/* <Nav /> */}
           <div className="relative flex max-h-screen items-center justify-center overflow-hidden px-6 py-24 sm:px-6 sm:py-32 lg:px-8 ">
             {children}
           </div>
