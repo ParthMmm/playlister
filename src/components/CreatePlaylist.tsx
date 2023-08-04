@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
-  playingAtom,
   playlistAtom,
   promptAtom,
   removedTracksAtom,
@@ -37,15 +36,22 @@ const CreatePlaylist = ({ userId }: Props) => {
 
   const [name, setName] = useState<string>("");
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    createMutation.mutate({
+      userId,
+      token: token?.access_token,
+      removedTracks,
+      prompt,
+      name,
+    });
   };
 
   //filter
 
   return (
     <motion.div
-      className="flex flex-col gap-2 text-left text-zinc-900 dark:text-white "
+      className="flex flex-col gap-4 text-left text-zinc-900 dark:text-white "
       initial={{ opacity: 0, y: "0%" }}
       animate={{ opacity: 1, y: "0%" }}
       transition={{
@@ -54,29 +60,25 @@ const CreatePlaylist = ({ userId }: Props) => {
         ease: [0.075, 0.82, 0.165, 1],
       }}
     >
-      <Input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Playlist Name"
-      />
-      <Button
-        onClick={() =>
-          createMutation.mutate({
-            userId,
-            token: token?.access_token,
-            removedTracks,
-            prompt,
-            name,
-          })
-        }
-        disabled={createMutation.isLoading}
-      >
-        {createMutation.isLoading ? (
-          <Loader2 className="flex h-4 w-8 grow animate-spin" />
-        ) : (
-          <span>Create Playlist</span>
-        )}
-      </Button>
+      <form className="flex flex-col gap-4 text-left" onSubmit={handleSubmit}>
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Playlist Name"
+          required
+        />
+        <Button
+          disabled={createMutation.isLoading}
+          variant={"outline"}
+          type="submit"
+        >
+          {createMutation.isLoading ? (
+            <Loader2 className="flex h-4 w-8 grow animate-spin" />
+          ) : (
+            <span>Create Playlist</span>
+          )}
+        </Button>
+      </form>
     </motion.div>
   );
 };

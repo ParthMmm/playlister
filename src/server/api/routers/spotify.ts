@@ -49,13 +49,30 @@ type Cache = {
   badResults: ReturnSong[];
 };
 
+type TokenBody = {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  refresh_token: string;
+  scope: string;
+};
+
 export const spotifyRouter = createTRPCRouter({
   getToken: publicProcedure
-    .input(z.object({ code: z.string() }))
+    .input(
+      z.object({ code: z.string().optional(), userId: z.string().optional() })
+    )
     .query(async ({ input }) => {
-      const { code } = input;
+      const { code, userId } = input;
 
-      if (!code) {
+      if (userId) {
+        const token: TokenBody | null = await kv.get(userId);
+        if (token) {
+          return token;
+        }
+      }
+
+      if (!code && !userId) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "No code provided",
@@ -87,7 +104,11 @@ export const spotifyRouter = createTRPCRouter({
       });
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const body = await data.json();
+      const body: TokenBody = await data.json();
+
+      const user = await fetchUser(body.access_token);
+
+      void kv.set(user.id, body.access_token);
 
       return body as {
         access_token: string;
@@ -112,21 +133,7 @@ export const spotifyRouter = createTRPCRouter({
         });
       }
 
-      const authOptions = {
-        url: "https://api.spotify.com/v1/me",
-        headers: {
-          Authorization: "Bearer " + token,
-        },
-        json: true,
-      };
-
-      const data = await fetch(authOptions.url, {
-        method: "GET",
-        headers: authOptions.headers,
-      });
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const user: User = await data.json();
+      const user = fetchUser(token);
 
       return user;
     }),
@@ -243,7 +250,8 @@ export const spotifyRouter = createTRPCRouter({
           headers: authOptions.headers,
           body: JSON.stringify({
             name: name,
-            description: "Playlist created by Playlistify",
+            description:
+              "Playlist created by Playlister https://playlister.p11a.xyz/",
             public: true,
           }),
         });
@@ -305,6 +313,40 @@ export const spotifyRouter = createTRPCRouter({
       }
     }),
 });
+
+const fetchUser = async (token: string) => {
+  try {
+    const authOptions = {
+      url: "https://api.spotify.com/v1/me",
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+      json: true,
+    };
+
+    const data = await fetch(authOptions.url, {
+      method: "GET",
+      headers: authOptions.headers,
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const user: User = await data.json();
+
+    return user;
+  } catch (error: unknown) {
+    const e = error as Error;
+
+    console.error({
+      message: e.message,
+      function: "fetchUser",
+    });
+
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: e.message,
+    });
+  }
+};
 
 export type ReturnSong = {
   artist: string;

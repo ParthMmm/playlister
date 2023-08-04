@@ -47,8 +47,8 @@ export default function Page() {
   }
 
   return (
-    <div>
-      <Loader2 className="flex h-4 w-8 grow animate-spin" />
+    <div className="flex min-h-screen items-center justify-center">
+      <Loader2 className="flex h-4 w-8 grow animate-spin " />
     </div>
   );
 }

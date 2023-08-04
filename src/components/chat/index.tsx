@@ -1,4 +1,5 @@
 import { useCompletion } from "ai/react";
+import { motion } from "framer-motion";
 import { useSetAtom } from "jotai";
 import { Loader2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
@@ -51,6 +52,18 @@ export default function Chat({ userId }: Props) {
           )}
         </Button>
       </div>
+
+      {isLoading ? (
+        <motion.div
+          className="absolute mt-12"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <span className="flex text-center text-xs text-zinc-500 dark:text-zinc-400">
+            Formatting can take up to a minute depending on the number of songs
+          </span>
+        </motion.div>
+      ) : null}
     </form>
   );
 }

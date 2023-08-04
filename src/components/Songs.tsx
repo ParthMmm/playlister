@@ -54,7 +54,7 @@ const Songs = ({ userId }: Props) => {
           ease: [0.075, 0.82, 0.165, 1],
         }}
         exit={{ opacity: 0, y: "0%" }}
-        className="no-scrollbar flex h-[calc(100vh-4rem)] w-full  flex-col overflow-auto scroll-smooth p-4 md:w-1/2"
+        className="no-scrollbar flex h-[calc(100vh-12rem)] w-full  flex-col overflow-auto scroll-smooth p-4 md:w-1/2"
       >
         <div className="space-y-4">
           {songs.data.goodResults.map((song) => (

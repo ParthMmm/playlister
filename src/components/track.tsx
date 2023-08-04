@@ -62,7 +62,7 @@ const Track = ({ track }: { track: Item | null }) => {
     >
       <div
         className={cn(
-          "flex h-20 flex-row items-center justify-between overflow-hidden rounded-lg border-2  border-zinc-200 bg-transparent p-4 align-middle text-zinc-900 shadow-md transition-colors hover:border-zinc-500  dark:border-zinc-700 dark:text-white dark:hover:border-zinc-100",
+          "flex h-20 flex-row items-center justify-between overflow-hidden rounded-lg border-2  border-zinc-200 bg-transparent p-4 align-middle text-zinc-900 shadow-md transition-opacity  hover:border-zinc-500 dark:border-zinc-700 dark:text-white dark:hover:border-zinc-100",
           `${removed ? "opacity-50" : null}`
         )}
       >

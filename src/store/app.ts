@@ -1,9 +1,5 @@
-//add jotai atom
+import { atom } from "jotai";
 
-import { type PrimitiveAtom, atom } from "jotai";
-import { atomWithStorage, createJSONStorage } from "jotai/utils";
-
-const storage = createJSONStorage(() => sessionStorage);
 export const codeAtom = atom("" as string);
 
 export type Token = {
@@ -14,17 +10,13 @@ export type Token = {
   scope: string;
 };
 
-export const tokenAtom = atomWithStorage(
-  "x",
-  {
-    access_token: "",
-    token_type: "",
-    expires_in: 0,
-    refresh_token: "",
-    scope: "",
-  } as Token,
-  storage
-) as PrimitiveAtom<Token>;
+export const tokenAtom = atom({
+  access_token: "",
+  token_type: "",
+  expires_in: 0,
+  refresh_token: "",
+  scope: "",
+} as Token);
 
 type Length = {
   good: number;

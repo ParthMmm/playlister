@@ -5,7 +5,7 @@
 @layer base {
   html,
   body {
-    @apply text-base antialiased;
+    @apply text-base uppercase antialiased;
   }
   body {
     font-feature-settings: "rlig" 1, "calt" 1;

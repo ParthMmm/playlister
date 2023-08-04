@@ -20,7 +20,7 @@ function Counter({ value, className }: { value: number; className?: string }) {
         className
       )}
     >
-      {/* <Digit place={100} value={value} /> */}
+      {value > 100 ? <Digit place={100} value={value} /> : null}
       <Digit place={10} value={value} />
       <Digit place={1} value={value} />
     </div>
@@ -61,6 +61,9 @@ function Number({ mv, number }: { mv: MotionValue; number: number }) {
   return (
     <motion.span
       style={{ y }}
+      transition={{
+        delay: 1.4,
+      }}
       className="absolute inset-0 flex items-center justify-center"
     >
       {number}

@@ -16,6 +16,49 @@ export default function Page() {
   const token = useAtomValue(tokenAtom);
   const playlist = useAtomValue(playlistAtom);
 
+  const main = {
+    // initial: {
+    //   opacity: 0,
+    //   y: "-20%",
+    //   clipPath: "inset(0% 0% 0% 0% round 10px)",
+    // },
+    // animate: { opacity: 1, y: "0%" },
+    transition: {
+      duration: 2,
+      type: "tween",
+      delay: 1,
+      ease: [0.075, 0.82, 0.165, 1],
+      // staggerChildren: 2,
+    },
+    exit: { opacity: 0, y: "0%" },
+  };
+
+  const variant = {
+    initial: {
+      opacity: 0,
+      y: "-20%",
+    },
+    animate: { opacity: 1, y: "0%" },
+    transition: {
+      delay: 1.4,
+      duration: 1.4,
+      type: "tween",
+      ease: [0.075, 0.82, 0.165, 1],
+    },
+  };
+
+  const buttonVariant = {
+    initial: { opacity: 0, scale: 0.8 },
+    animate: { opacity: 1, scale: 1 },
+    transition: {
+      delay: 1.8,
+      duration: 1,
+      type: "spring",
+      bounce: 0.6,
+      ease: [0.075, 0.82, 0.165, 1],
+    },
+  };
+
   const user = api.spotify.getUser.useQuery(
     { token: token?.access_token },
     {
@@ -33,24 +76,41 @@ export default function Page() {
   if (!user?.data?.id) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: "20%" }}
-        animate={{ opacity: 1, y: "0%" }}
-        transition={{
-          duration: 1.5,
-          type: "tween",
-          delay: 1,
-          ease: [0.075, 0.82, 0.165, 1],
-        }}
-        exit={{ opacity: 0, y: "0%" }}
+        className="relative overflow-hidden text-center"
+        variants={main}
+        initial="initial"
+        animate="animate"
+        transition={main.transition}
+        exit="exit"
       >
-        <h2 className="  text-3xl font-bold tracking-tight sm:text-4xl">
+        <motion.h1
+          className="text-3xl font-bold tracking-tighter sm:text-4xl"
+          variants={variant}
+          initial="initial"
+          animate="animate"
+          transition={variant.transition}
+        >
           Playlister
-          <br />
+        </motion.h1>
+
+        <motion.p
+          variants={variant}
+          initial="initial"
+          animate="animate"
+          transition={variant.transition}
+          className="mt-2 text-2xl font-semibold tracking-tighter "
+        >
           Turn a tracklist into a playlist
-        </h2>
-        <div className="mt-24 flex items-center justify-center ">
+        </motion.p>
+        <motion.div
+          variants={buttonVariant}
+          initial="initial"
+          animate="animate"
+          transition={buttonVariant.transition}
+          className="mt-24 flex items-center justify-center "
+        >
           <Spotify />
-        </div>
+        </motion.div>
       </motion.div>
     );
   }
@@ -74,11 +134,22 @@ export default function Page() {
   if (user.data.id && formatted) {
     return (
       <>
-        <div className="gap-18 flex w-full flex-col align-middle md:flex-row md:justify-between md:gap-36 ">
-          <div className="mr-auto flex flex-col justify-start gap-4">
+        <div className="mt-60 flex w-full flex-col align-middle  md:mt-24 md:flex-row md:justify-between ">
+          <motion.div
+            className="mr-auto flex flex-col items-center justify-start gap-4"
+            initial={{ opacity: 0, y: "0%" }}
+            animate={{ opacity: 1, y: "0%" }}
+            transition={{
+              duration: 1.0,
+              delay: 1.3,
+              ease: [0.075, 0.82, 0.165, 1],
+            }}
+          >
             <Counts />
-            <CreatePlaylist userId={user.data.id} />
-          </div>
+            <div className="my-4 flex items-center justify-center align-middle md:mt-24">
+              <CreatePlaylist userId={user.data.id} />
+            </div>
+          </motion.div>
           <Songs userId={user?.data?.id} />
         </div>
       </>

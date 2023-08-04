@@ -4,6 +4,7 @@ import Head from "next/head";
 import { ModeToggle } from "~/components/theme-toggle";
 
 import { Inter } from "next/font/google";
+import { motion } from "framer-motion";
 
 type Props = {
   children: ReactNode;
@@ -24,8 +25,8 @@ function Layout({ children }: Props) {
       <main className={inter.className}>
         <div className=" no-scrollbar mx-auto max-h-screen min-h-screen max-w-7xl px-4 sm:px-6 lg:px-8 ">
           <Nav />
-          <div className="relative max-h-screen overflow-hidden px-6 py-24 sm:px-6 sm:py-32 lg:px-8 ">
-            <div className="mx-auto  text-center">{children}</div>
+          <div className="relative flex max-h-screen items-center justify-center overflow-hidden px-6 py-24 sm:px-6 sm:py-32 lg:px-8 ">
+            {children}
           </div>
         </div>
       </main>
@@ -35,10 +36,20 @@ function Layout({ children }: Props) {
 
 const Nav = () => {
   return (
-    <div className="fixed mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-      <div className="relative flex  items-center justify-between">
+    <div className="fixed right-0 z-50 mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+      <motion.div
+        className="relative"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{
+          duration: 1,
+          delay: 0,
+          type: "tween",
+          ease: [0.075, 0.82, 0.165, 1],
+        }}
+      >
         <ModeToggle />
-      </div>
+      </motion.div>
     </div>
   );
 };
