@@ -17,16 +17,16 @@ export default function Page() {
   const playlist = useAtomValue(playlistAtom);
 
   const main = {
-    // initial: {
-    //   opacity: 0,
-    //   y: "-20%",
-    //   clipPath: "inset(0% 0% 0% 0% round 10px)",
-    // },
-    // animate: { opacity: 1, y: "0%" },
+    initial: {
+      opacity: 0,
+      y: "-20%",
+      // clipPath: "inset(0% 0% 0% 0% round 10px)",
+    },
+    animate: { opacity: 1, y: "0%" },
     transition: {
-      duration: 2,
+      duration: 1,
       type: "tween",
-      delay: 1,
+
       ease: [0.075, 0.82, 0.165, 1],
       // staggerChildren: 2,
     },
@@ -40,8 +40,8 @@ export default function Page() {
     },
     animate: { opacity: 1, y: "0%" },
     transition: {
-      delay: 1.4,
-      duration: 1.4,
+      delay: 0.2,
+      duration: 1,
       type: "tween",
       ease: [0.075, 0.82, 0.165, 1],
     },
@@ -51,7 +51,7 @@ export default function Page() {
     initial: { opacity: 0, scale: 0.8 },
     animate: { opacity: 1, scale: 1 },
     transition: {
-      delay: 1.8,
+      delay: 0.4,
       duration: 1,
       type: "spring",
       bounce: 0.6,

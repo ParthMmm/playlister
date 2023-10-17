@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { useAtomValue } from "jotai";
 import Counter from "~/components/counter";
 import { formattedAtom, lengthAtom } from "~/store/app";
