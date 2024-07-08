@@ -11,6 +11,8 @@ const Spotify = () => {
   const setToken = useSetAtom(tokenAtom);
   const code = router.query.code as string;
 
+  console.log(code);
+
   const { data } = api.spotify.getToken.useQuery(
     {
       code: code,
@@ -22,7 +24,7 @@ const Spotify = () => {
       refetchOnWindowFocus: false,
       refetchIntervalInBackground: false,
       // keepPreviousData: true,
-    }
+    },
   );
 
   if (data) {

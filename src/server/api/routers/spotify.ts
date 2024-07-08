@@ -60,10 +60,12 @@ type TokenBody = {
 export const spotifyRouter = createTRPCRouter({
   getToken: publicProcedure
     .input(
-      z.object({ code: z.string().optional(), userId: z.string().optional() })
+      z.object({ code: z.string().optional(), userId: z.string().optional() }),
     )
     .query(async ({ input }) => {
       const { code, userId } = input;
+
+      console.log(code, userId);
 
       if (userId) {
         const token: TokenBody | null = await kv.get(userId);
@@ -86,7 +88,7 @@ export const spotifyRouter = createTRPCRouter({
           Authorization:
             "Basic " +
             Buffer.from(
-              env.SPOTIFY_CLIENT_ID + ":" + env.SPOTIFY_CLIENT_SECRET
+              env.SPOTIFY_CLIENT_ID + ":" + env.SPOTIFY_CLIENT_SECRET,
             ).toString("base64"),
         },
         form: {
@@ -140,7 +142,7 @@ export const spotifyRouter = createTRPCRouter({
 
   getSongs: publicProcedure
     .input(
-      z.object({ userId: z.string(), token: z.string(), prompt: z.string() })
+      z.object({ userId: z.string(), token: z.string(), prompt: z.string() }),
     )
     .query(async ({ input }) => {
       const { userId, token, prompt } = input;
@@ -184,12 +186,12 @@ export const spotifyRouter = createTRPCRouter({
 
         //sort successfull results where tracks are not null
         const goodResults = filteredResults.filter(
-          (result) => result?.track !== null
+          (result) => result?.track !== null,
         ) as ReturnSong[];
 
         //get all tracks that are null
         const badResults = filteredResults.filter(
-          (result) => result?.track === null
+          (result) => result?.track === null,
         ) as ReturnSong[];
 
         await kv.set(spotKey, {
@@ -228,7 +230,7 @@ export const spotifyRouter = createTRPCRouter({
         removedTracks: z.array(z.string()),
         prompt: z.string(),
         name: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const { userId, token, removedTracks, prompt, name } = input;
@@ -271,7 +273,7 @@ export const spotifyRouter = createTRPCRouter({
 
           //filter out removed tracks
           const filteredResults = goodResults.filter(
-            (result) => !removedTracks.includes(result?.track?.id)
+            (result) => !removedTracks.includes(result?.track?.id),
           );
 
           const authOptions = {
@@ -356,7 +358,7 @@ export type ReturnSong = {
 
 async function searchSongs(
   songs: Songs,
-  token: string
+  token: string,
 ): Promise<(ReturnSong | null)[]> {
   try {
     const promises = songs.map((song: Song) => getTracks(song, token));
@@ -389,12 +391,12 @@ const getTracks = async (song: Song, token: string) => {
   try {
     const res = await fetch(
       `${authOptions.url}?q=track:${encodeURIComponent(
-        song.song
+        song.song,
       )}%20artist:${encodeURIComponent(song.artist)}&type=track`,
       {
         method: "GET",
         headers: authOptions.headers,
-      }
+      },
     );
 
     if (!res.ok) {
